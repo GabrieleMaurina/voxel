@@ -6,17 +6,13 @@ using UnityEngine;
 
 public class World : MonoBehaviour
 {
-	private readonly sbyte AIR = -1;
-	private readonly sbyte CONCRETE = 0;
-	private readonly sbyte DIRT = 1;
-
 	private readonly int POOL_MAX_SIZE = 10;
 
 	public GameObject voxelPrefab;
 	private ConcurrentBag<Voxel> voxelsPool = new ConcurrentBag<Voxel>();
-	private Dictionary<Vector3Int, sbyte> world;
+	public Dictionary<Vector3Int, sbyte> world;
 	private Dictionary<Vector3Int, Voxel> voxels;
-	private Block[] blocks;
+	public Block[] blocks;
 
 	void Start()
 	{
@@ -24,15 +20,15 @@ public class World : MonoBehaviour
 		voxels = new Dictionary<Vector3Int, Voxel>();
 		blocks = new Block[]
 		{
-			new Concrete(world),
-			new Dirt(world)
+			new Concrete(this),
+			new Dirt(this)
 		};
 		SpawnPlatform();
 	}
 
 	public void SetBlock(Vector3Int pos, sbyte id)
 	{
-		if (id == AIR)
+		if (id == Utilities.AIR)
 		{
 			if (world.Count > 1)
 			{
@@ -89,7 +85,7 @@ public class World : MonoBehaviour
 	{
 		return Utilities.AROUND.Any(delta =>
 		{
-			return !world.ContainsKey(pos + delta);
+			return !world.TryGetValue(pos + delta, out sbyte id) || !blocks[id].full;
 		});
 	}
 
@@ -118,8 +114,8 @@ public class World : MonoBehaviour
 
 	private void SpawnPlatform()
 	{
-		//SetBlock(new Vector3Int(0, 0, 0), CONCRETE);
-		Fill(new Vector3Int(10, 0, 10), new Vector3Int(-10, -2, -10), CONCRETE);
+		SetBlock(new Vector3Int(0, 1, 0), Utilities.DIRT);
+		Fill(new Vector3Int(10, 0, 10), new Vector3Int(-10, -2, -10), Utilities.CONCRETE);
 	}
 
 	public void Fill(Vector3Int p1, Vector3Int p2, sbyte id)
@@ -153,7 +149,7 @@ public class World : MonoBehaviour
 					p.x = x;
 					p.y = y;
 					p.z = z;
-					if (id == AIR)
+					if (id == Utilities.AIR)
 						world.Remove(p);
 					else
 						world[p] = id;

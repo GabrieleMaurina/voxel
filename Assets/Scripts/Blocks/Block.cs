@@ -4,7 +4,7 @@ using UnityEngine;
 
 public abstract class Block
 {
-	protected Dictionary<Vector3Int, sbyte> world;
+	protected World world;
 	protected Material mat;
 	protected Mesh mesh;
 
@@ -13,20 +13,22 @@ public abstract class Block
 	protected Vector3[] vertices;
 	protected int[] triangles;
 
-	public Block(Dictionary<Vector3Int, sbyte> world)
+	public bool full = true;
+
+	public Block(World world)
 	{
-		this.world = world;
 		mat = Resources.Load<Material>("Materials/Default");
+		this.world = world;
 	}
 
-	public void UpdateBlock(Vector3Int pos, Voxel voxel)
+	public virtual void UpdateBlock(Vector3Int pos, Voxel voxel)
 	{
 		mesh = new Mesh();
 
 		facesNumber = 0;
 		for(int i = 0; i < 6; i++)
 		{
-			if (!world.ContainsKey(Utilities.AROUND[i] + pos))
+			if (!world.world.TryGetValue(Utilities.AROUND[i] + pos, out sbyte id) || !world.blocks[id].full)
 			{
 				faces[i] = true;
 				facesNumber++;
@@ -47,11 +49,11 @@ public abstract class Block
 			{
 				for (int j = 0; j < 4; j++)
 				{
-					vertices[facesNumber * 4 + j] = Utilities.CUBE_VERTICES[Utilities.FACE_VERTICES[i * 4 + j]];
+					vertices[facesNumber * 4 + j] = Utilities.CUBE_VERTICES[Utilities.CUBE_FACES[i * 4 + j]];
 				}
 				for (int j = 0; j < 6; j++)
 				{
-					triangles[facesNumber * 6 + j] = facesNumber * 4 + Utilities.TRIANGLES[j];
+					triangles[facesNumber * 6 + j] = facesNumber * 4 + Utilities.CUBE_TRIANGLES[j];
 				}
 				facesNumber++;
 			}

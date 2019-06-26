@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class Creative : MonoBehaviour
 {
-	private readonly int CONCRETE = 0;
-	private readonly int DIRT = 1;
 	private readonly int DESTROY = 2;
 
 	private readonly Vector3 CROSSHAIR = new Vector3(0.5F, 0.5F, 0);
